@@ -24,7 +24,7 @@ jobs:
         run: git clone https://github.com/Yu-Vitaqua-fer-Chronos/Astrea --depth 1
 
       - name: Build with Nimble
-        run: cd Astrea && ~/.nimble/bin/nimble --nim:~/.nimble/bin/nim build -d:release -d:speed
+        run: cd Astrea && ~/.nimble/bin/nimble -y --nim:~/.nimble/bin/nim build -d:release -d:speed
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
