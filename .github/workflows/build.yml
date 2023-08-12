@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 1
 
       - name: Build with Nimble
-        run: ~/.nimble/bin/nimble build -d:release -d:speed
+        run: ~/.nimble/bin/nimble --nim:~/.nimble/bin/nim build -d:release -d:speed
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
