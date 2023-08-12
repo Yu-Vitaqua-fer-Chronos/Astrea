@@ -9,23 +9,16 @@ import std/[
   json
 ]
 
-randomize()
-
 import dimscord
 
+import ./[
+  shared,
+  types
+]
+
+randomize()
+
 let lowMt = getMonoTime() - initDuration(minutes=5)
-
-var started = false
-
-type
-  Config = object
-    token: string
-    randomPrompts: bool = true
-
-  Data = object
-    prompts: seq[string] = newSeq[string](0)
-    blacklist: seq[string] = newSeq[string](0)
-    statuses: seq[ActivityStatus] = newSeq[ActivityStatus](0)
 
 var
   data = readFile("data.json").parseJson().to(Data)
@@ -36,44 +29,61 @@ let
   astrea = newDiscordClient(config.token)
 
 proc onReady(s: Shard, r: Ready) {.event(astrea).} =
-  if not started:
-    echo "Astrea Shadowstar, reporting for duty!"
-    started = true
+  echo "Astrea Shadowstar, reporting for duty!"
 
-  #await s.updateStatus(data.statuses) # currently does nothing
+  var status: string
+
+  while true:
+    status = "online"
+
+    if s.latency >= 425:
+      if s.latency <= 700:
+        status = "idle"
+
+      elif s.latency > 700:
+        status = "dnd"
+
+    asyncCheck s.updateStatus(sample(data.activities).some, status)
+
+    await sleepAsync 15000
+
 
 proc messageCreate(s: Shard, m: Message) {.event(astrea).} =
   if m.author.bot:
     return
 
-  let cs = (await astrea.api.getChannel(m.channel_id))[0]
+  var cuId = m.channel_id
 
-  let c: GuildChannel = if cs.isSome:
-    cs.get()
-  else:
+  if cuId in data.blacklist:
     return
 
-  if c.id in data.blacklist:
-    return
+  while cuId notin data.whitelist:
+    let mc = (await astrea.api.getChannel(cuId))[0]
 
-  elif c.parent_id.isSome:
-    if c.parent_id.get() in data.blacklist:
-      return
+    if mc.isSome:
+      if mc.get().parent_id.isSome:
+        cuId = mc.get().parent_id.get()
 
-  if (getMonoTime() - channelCooldown.getOrDefault(c.id, lowMt)).inMinutes >= 5:
-    channelCooldown[c.id] = getMonoTime()
+        if cuId in data.blacklist:
+          return
+
+      else:
+        return
+
+  if (getMonoTime() - channelCooldown.getOrDefault(m.channel_id, lowMt)).inMinutes >= 5:
+    channelCooldown[m.channel_id] = getMonoTime()
 
     var msg: Message
 
     if config.randomPrompts:
-      msg = await astrea.api.sendMessage(c.id, "@everyone\n" & data.prompts.sample())
+      msg = await astrea.api.sendMessage(m.channel_id, "@everyone\n" & data.prompts.sample())
     else:
-      msg = await astrea.api.sendMessage(c.id, "@everyone")
+      msg = await astrea.api.sendMessage(m.channel_id, "@everyone")
 
-    await astrea.api.deleteMessage(c.id, msg.id)
+    await astrea.api.deleteMessage(msg.channel_id, msg.id)
 
   else:
-    channelCooldown[c.id] = getMonoTime()
+    channelCooldown[m.channel_id] = getMonoTime()
 
 
 waitFor astrea.startSession(
