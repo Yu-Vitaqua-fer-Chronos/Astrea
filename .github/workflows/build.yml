@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: oraclelinux:9-slim
+      image: oraclelinux:7-slim
     steps:
       - name: Install build essentials
         run: |
