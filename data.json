@@ -1,14 +1,28 @@
 {
-  "prompts": [
-    "\"*boobs*\" -Azalea"
-  ],
-  "blacklist": [
-  ],
-  "statuses": [
-    {"name": "cute transfems <3", "kind": "atListening"},
-    {"name": "for any cuties who like android girls ;w;", "kind": "atWatching"},
-    {"name": "out plans for world domination in my mind >:3", "kind": "atPlaying"},
-    {"name": "my plans to other cute transfem androids :3", "kind": "atStreaming"},
-    {"name": "Never gonna give you up never gonna let you down", "kind": "atCustom"}
-  ]
+    "prompts":[
+        "\"*boobs*\" -Azalea"
+    ],
+    "statuses":[
+        {
+            "name":"cute transfems <3",
+            "kind":"atListening"
+        },
+        {
+            "kind":"atWatching",
+            "name":"for any cuties who like android girls ;w;"
+        },
+        {
+            "name":"out plans for world domination in my mind >:3",
+            "kind":"atPlaying"
+        },
+        {
+            "name":"my plans to other cute transfem androids :3",
+            "kind":"atStreaming"
+        },
+        {
+            "name":"Never gonna give you up never gonna let you down",
+            "kind":"atCustom"
+        }
+    ],
+    "blacklist":[]
 }

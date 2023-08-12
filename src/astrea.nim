@@ -40,7 +40,7 @@ proc onReady(s: Shard, r: Ready) {.event(astrea).} =
     echo "Astrea Shadowstar, reporting for duty!"
     started = true
 
-  await s.updateStatus(data.statuses)
+  #await s.updateStatus(data.statuses) # currently does nothing
 
 proc messageCreate(s: Shard, m: Message) {.event(astrea).} =
   if m.author.bot:
