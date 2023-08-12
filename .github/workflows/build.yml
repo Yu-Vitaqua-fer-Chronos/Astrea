@@ -12,11 +12,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: oraclelinux:7-slim
+      image: oraclelinux:8-slim
     steps:
       - name: Install build essentials
         run: |
-          dnf install git xz tar findutils clang curl
+          microdnf install git xz tar findutils clang curl
           curl https://nim-lang.org/choosenim/init.sh -sSf > init.sh
           sh init.sh -y
 
