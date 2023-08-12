@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Install build essentials
         run: |
-          microdnf install git xz tar findutils clang curl
+          dnf install git xz tar findutils clang curl
           curl https://nim-lang.org/choosenim/init.sh -sSf > init.sh
           sh init.sh -y
 
