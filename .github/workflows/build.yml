@@ -17,8 +17,9 @@ jobs:
       - name: Install build essentials
         run: |
           microdnf install git tar findutils clang curl
-          curl https://nim-lang.org/choosenim/init.sh -sSf | sh
-          choosenim stable
+          curl https://nim-lang.org/choosenim/init.sh -sSf > init.sh
+          sh init.sh -y
+          choosenim stable -y
 
       - uses: actions/checkout@v3
         with:
