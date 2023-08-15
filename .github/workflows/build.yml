@@ -24,7 +24,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build with Nimble
-        run: cd $GITHUB_WORKSPACE && ~/.nimble/bin/nimble -y --nim:~/.nimble/bin/nim build -d:release -d:speed
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE
+          ~/.nimble/bin/nimble -y --nim:~/.nimble/bin/nim build -d:release -d:speed
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
