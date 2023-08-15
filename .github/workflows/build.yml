@@ -21,7 +21,7 @@ jobs:
           sh init.sh -y
 
       - name: Clone source
-        run: git clone https://github.com/Yu-Vitaqua-fer-Chronos/Astrea --depth 1
+        uses: actions/checkout@v3
 
       - name: Build with Nimble
         run: cd Astrea && ~/.nimble/bin/nimble -y --nim:~/.nimble/bin/nim build -d:release -d:speed

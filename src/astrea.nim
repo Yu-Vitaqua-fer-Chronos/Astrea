@@ -40,8 +40,10 @@ proc messageCreate(s: Shard, m: Message) {.event(astrea).} =
   asyncCheck dmHandler(s, m)
   asyncCheck bridgeHandler(s, m)
 
+#[
 proc interactionCreate(s: Shard, i: Interaction) {.event(astrea).} =
     discard await cmd.handleInteraction(s, i)
+]#
 
 waitFor astrea.startSession(
   gateway_intents={giGuilds, giGuildMessages, giMessageContent},
