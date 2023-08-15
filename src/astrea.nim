@@ -1,35 +1,24 @@
 import std/[
   asyncdispatch,
-  monotimes,
-  #strutils,
-  options,
-  random,
-  tables,
-  times,
-  json
+  random
 ]
 
 import dimscord
+import dimscmd
 
 import ./[
+  forwarder,
+  dmlogic,
   shared,
   types
 ]
 
 randomize()
 
-let lowMt = getMonoTime() - initDuration(minutes=5)
-
-var
-  data = readFile("data.json").parseJson().to(Data)
-  channelCooldown: Table[string, MonoTime]
-
-let
-  config = readFile("config.json").parseJson().to(Config)
-  astrea = newDiscordClient(config.token)
-
 proc onReady(s: Shard, r: Ready) {.event(astrea).} =
   echo "Astrea Shadowstar, reporting for duty!"
+
+  await cmd.registerCommands()
 
   var status: string
 
@@ -47,44 +36,12 @@ proc onReady(s: Shard, r: Ready) {.event(astrea).} =
 
     await sleepAsync 15000
 
-
 proc messageCreate(s: Shard, m: Message) {.event(astrea).} =
-  if m.author.bot:
-    return
+  asyncCheck dmHandler(s, m)
+  asyncCheck bridgeHandler(s, m)
 
-  var cuId = m.channel_id
-
-  if cuId in data.blacklist:
-    return
-
-  while cuId notin data.whitelist:
-    let mc = (await astrea.api.getChannel(cuId))[0]
-
-    if mc.isSome:
-      if mc.get().parent_id.isSome:
-        cuId = mc.get().parent_id.get()
-
-        if cuId in data.blacklist:
-          return
-
-      else:
-        return
-
-  if (getMonoTime() - channelCooldown.getOrDefault(m.channel_id, lowMt)).inMinutes >= 5:
-    channelCooldown[m.channel_id] = getMonoTime()
-
-    var msg: Message
-
-    if config.randomPrompts:
-      msg = await astrea.api.sendMessage(m.channel_id, "@everyone\n" & data.prompts.sample())
-    else:
-      msg = await astrea.api.sendMessage(m.channel_id, "@everyone")
-
-    await astrea.api.deleteMessage(msg.channel_id, msg.id)
-
-  else:
-    channelCooldown[m.channel_id] = getMonoTime()
-
+proc interactionCreate(s: Shard, i: Interaction) {.event(astrea).} =
+    discard await cmd.handleInteraction(s, i)
 
 waitFor astrea.startSession(
   gateway_intents={giGuilds, giGuildMessages, giMessageContent},
