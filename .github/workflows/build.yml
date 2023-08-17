@@ -8,10 +8,6 @@ on:
       - '**'
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: ${{env.GITHUB_WORKSPACE}}
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,8 +25,10 @@ jobs:
 
       - name: Build with Nimble
         run: |
+          cd $GITHUB_WORKSPACE
           git config --global --add safe.directory .
           ~/.nimble/bin/nimble -y --nim:~/.nimble/bin/nim build -d:release -d:speed
+          mv ./astrea_client ~/astrea_client
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
