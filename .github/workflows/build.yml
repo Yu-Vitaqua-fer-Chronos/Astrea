@@ -30,8 +30,8 @@ jobs:
           ~/.nimble/bin/nimble -y --nim:~/.nimble/bin/nim build -d:release -d:speed
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
         working-directory: $GITHUB_WORKSPACE
+        uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
           path: ./astrea_client
