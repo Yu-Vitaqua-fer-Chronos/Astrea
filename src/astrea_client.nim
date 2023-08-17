@@ -1,5 +1,6 @@
 import std/[
   asyncdispatch,
+  options,
   random
 ]
 
@@ -7,7 +8,6 @@ import dimscord
 import dimscmd
 
 import ./[
-  forwarder,
   dmlogic,
   shared,
   types
@@ -37,13 +37,10 @@ proc onReady(s: Shard, r: Ready) {.event(astrea).} =
     await sleepAsync 15000
 
 proc messageCreate(s: Shard, m: Message) {.event(astrea).} =
-  asyncCheck dmHandler(s, m)
-  asyncCheck bridgeHandler(s, m)
+  await dmHandler(s, m)
 
-#[
 proc interactionCreate(s: Shard, i: Interaction) {.event(astrea).} =
     discard await cmd.handleInteraction(s, i)
-]#
 
 waitFor astrea.startSession(
   gateway_intents={giGuilds, giGuildMessages, giMessageContent},

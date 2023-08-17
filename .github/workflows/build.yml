@@ -33,4 +33,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: $GITHUB_WORKSPACE/astrea
+          path: $GITHUB_WORKSPACE/astrea_client

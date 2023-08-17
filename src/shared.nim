@@ -9,20 +9,28 @@ import dimscord
 import dimscmd
 
 import ./[
+  constants,
   types
 ]
 
+template loadJsonFile(s: string): JsonNode =
+  try:
+    parseFile(s)
+  except JsonParsingError as err:
+    raise newException(JsonParsingError, "There was an error parsing `" &
+      s & "`! Check the JSON file to fix the error!", err)
+
 let
-  config* = parseFile("config.json").to(Config)
+  config* = loadJsonFile("config.json").to(Config)
   astrea* = newDiscordClient(config.token)
 
 var
   dataLocked = false
-  data* = parseFile("data.json").to(Data)
+  data* = loadJsonFile("data.json").to(Data)
   channelCooldown*: Table[string, MonoTime]
-  cmd* = astrea.newHandler()
+  cmd* = astrea.newHandler(defaultGuildID=DefaultGuildID)
 
-proc save(d: Data) {.async.} =
+proc save*(d: Data) {.async.} =
   while dataLocked:
     await sleepAsync(1000)
 
@@ -31,5 +39,3 @@ proc save(d: Data) {.async.} =
   writeFile("data.json", pretty(%*d))
 
   dataLocked = false
-
-waitFor save(data)

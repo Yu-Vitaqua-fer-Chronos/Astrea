@@ -1,2 +1,2 @@
 const
-  DefaultGuildID {.strdefine.} = ""
+  DefaultGuildID* {.strdefine.} = ""

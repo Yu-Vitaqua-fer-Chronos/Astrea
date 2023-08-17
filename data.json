@@ -1,28 +1,33 @@
-s{
-    "prompts": [
-        "\"*boobs*\" -Azalea"
-    ],
-    "activities": [
-        {
-            "name":"cute transfems <3",
-            "kind":"atListening"
-        },
-        {
-            "name":"for any cuties who like android girls ;w;",
-            "kind":"atWatching"
-        },
-        {
-            "name":"out plans for world domination in my mind >:3",
-            "kind":"atPlaying"
-        },
-        {
-            "name":"my plans out to other cute transfem androids :3",
-            "kind":"atPlaying"
-        }
-    ],
-    "whitelist": [
-        "1138652785823461437",
-        "1138652831323263128"
-    ],
-    "blacklist": []
+{
+  "prompts": [
+    "\"*boobs*\" -Azalea"
+  ],
+  "whitelist": [
+    "1138652785823461437",
+    "1138652831323263128"
+  ],
+  "blacklist": [],
+  "activities": [
+    {
+      "name": "cute transfems <3",
+      "kind": "atListening",
+      "url": null
+    },
+    {
+      "name": "for any cuties who like android girls ;w;",
+      "kind": "atWatching",
+      "url": null
+    },
+    {
+      "name": "out plans for world domination in my mind >:3",
+      "kind": "atPlaying",
+      "url": null
+    },
+    {
+      "name": "my plans out to other cute transfem androids :3",
+      "kind": "atPlaying",
+      "url": null
+    }
+  ],
+  "linkedChannels": {}
 }
