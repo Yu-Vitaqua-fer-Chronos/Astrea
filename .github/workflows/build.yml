@@ -25,8 +25,8 @@ jobs:
 
       - name: Build with Nimble
         run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
           cd $GITHUB_WORKSPACE
-          git config --global --add safe.directory .
           ~/.nimble/bin/nimble -y --nim:~/.nimble/bin/nim build -d:release -d:speed
           mv ./astrea_client ~/astrea_client
 
