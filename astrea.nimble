@@ -12,5 +12,5 @@ bin           = @["astrea_client"]
 
 requires "nim >= 2.0.0"
 
-requires "dimscord#5ca4dd3"
+requires "dimscord#2bc1545"
 requires "dimscmd >= 1.4.0"

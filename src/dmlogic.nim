@@ -120,7 +120,7 @@ cmd.addSlash("dm blacklist add") do (channel: Option[GuildChannel]):
     await astrea.api.sendInteractionMessage(i, "Channel added to blacklist!!")
     await data.save()
 
-cmd.addSlash("dm whitelist rm") do (channel: Option[GuildChannel]):
+cmd.addSlash("dm whitelist remove") do (channel: Option[GuildChannel]):
   ## Unwhitelists a channel for pinging
   if canUseCommand(i, channel).await:
     let
@@ -135,7 +135,7 @@ cmd.addSlash("dm whitelist rm") do (channel: Option[GuildChannel]):
     await astrea.api.sendInteractionMessage(i, "Channel removed from the whitelist!")
     await data.save()
 
-cmd.addSlash("dm blacklist rm") do (channel: Option[GuildChannel]):
+cmd.addSlash("dm blacklist remove") do (channel: Option[GuildChannel]):
   ## Unblacklists a channel for pinging
   if canUseCommand(i, channel).await:
     let
