@@ -1,6 +1,7 @@
 {
   "prompts": [
-    "\"*boobs*\" -Azalea"
+    "\"*boobs*\" -Azalea",
+    "\"I lik da rocc, 4 scienc yis\" -Chronos"
   ],
   "whitelist": [
     "1138652785823461437",
@@ -8,6 +9,7 @@
     "1139585678057951262"
   ],
   "blacklist": [],
+  "customCooldowns": {},
   "activities": [
     {
       "name": "cute transfems <3",

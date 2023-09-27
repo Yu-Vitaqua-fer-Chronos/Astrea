@@ -1,6 +1,6 @@
 # Package
 
-version       = "1.0.0"
+version       = "1.2.0"
 author        = "Yu Vitaqua fer Chronos"
 description   = "Astrea discord bot! Mostly for DM Bot functionality"
 license       = "MIT"
@@ -12,5 +12,5 @@ bin           = @["astrea_client"]
 
 requires "nim >= 2.0.0"
 
-requires "dimscord#2bc1545"
+requires "dimscord >= 1.6.0"
 requires "dimscmd >= 1.4.0"

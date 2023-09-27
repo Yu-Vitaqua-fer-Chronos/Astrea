@@ -17,7 +17,9 @@ import ./[
 ]
 
 
-let lowMt = getMonoTime() - initDuration(minutes=5)
+let
+  defaultDuration = initDuration(hours=24)
+  lowMt = getMonoTime() - defaultDuration
 
 proc dmHandler*(s: Shard, m: Message) {.async.} =
   if m.author.bot:
@@ -41,7 +43,7 @@ proc dmHandler*(s: Shard, m: Message) {.async.} =
       else:
         return
 
-  if (getMonoTime() - channelCooldown.getOrDefault(m.channel_id, lowMt)).inMinutes >= 5:
+  if (getMonoTime() - channelCooldown.getOrDefault(m.channel_id, lowMt)) >= data.customCooldowns.getOrDefault(m.channel_id, defaultDuration):
     channelCooldown[m.channel_id] = getMonoTime()
 
     var msg: Message
@@ -56,6 +58,26 @@ proc dmHandler*(s: Shard, m: Message) {.async.} =
   else:
     channelCooldown[m.channel_id] = getMonoTime()
 
+proc isWhitelisted(c: GuildChannel): Future[bool] {.async.} =
+  result = true
+
+  var cuId = c.id
+
+  if cuId in data.blacklist:
+    return
+
+  while cuId notin data.whitelist:
+    let mc = (await astrea.api.getChannel(cuId))[0]
+
+    if mc.isSome:
+      if mc.get().parent_id.isSome:
+        cuId = mc.get().parent_id.get()
+
+        if (cuId in data.blacklist) and (c.id notin data.whitelist):
+          return false
+
+      else:
+        return false
 
 proc canUseCommand(i: Interaction, channel: Option[GuildChannel]): Future[bool] {.async.} =
   result = true
@@ -68,6 +90,7 @@ proc canUseCommand(i: Interaction, channel: Option[GuildChannel]): Future[bool] 
   else:
     if not i.channel_id.isSome:
       await astrea.api.sendInteractionMessage(i, "*How did you get here?*")
+      return false
 
     let cchannel = (await astrea.api.getChannel(i.channel_id.get()))[0]
 
@@ -93,7 +116,7 @@ proc canUseCommand(i: Interaction, channel: Option[GuildChannel]): Future[bool] 
 cmd.addSlash("dm whitelist add") do (channel: Option[GuildChannel]):
   ## Whitelists a channel for pinging
   if canUseCommand(i, channel).await:
-    let c = channel.get()
+    let c = channel.get (await astrea.api.getChannel(i.channel_id.get()))[0].get()
 
     if c.id in data.blacklist:
       await astrea.api.sendInteractionMessage(i, "This channel was explicitly blacklisted! Please unblacklist it first!")
@@ -108,7 +131,7 @@ cmd.addSlash("dm whitelist add") do (channel: Option[GuildChannel]):
 cmd.addSlash("dm blacklist add") do (channel: Option[GuildChannel]):
   ## Blacklists a channel for pinging
   if canUseCommand(i, channel).await:
-    let c = channel.get()
+    let c = channel.get (await astrea.api.getChannel(i.channel_id.get()))[0].get()
 
     if c.id in data.whitelist:
       await astrea.api.sendInteractionMessage(i, "This channel was explicitly whitelisted! Please unwhitelist it first!")
@@ -124,7 +147,7 @@ cmd.addSlash("dm whitelist remove") do (channel: Option[GuildChannel]):
   ## Unwhitelists a channel for pinging
   if canUseCommand(i, channel).await:
     let
-      c = channel.get()
+      c = channel.get (await astrea.api.getChannel(i.channel_id.get()))[0].get()
       loc = data.whitelist.find c.id
 
     if loc == -1:
@@ -139,7 +162,7 @@ cmd.addSlash("dm blacklist remove") do (channel: Option[GuildChannel]):
   ## Unblacklists a channel for pinging
   if canUseCommand(i, channel).await:
     let
-      c = channel.get()
+      c = channel.get (await astrea.api.getChannel(i.channel_id.get()))[0].get()
       loc = data.blacklist.find c.id
 
     if loc == -1:
@@ -149,3 +172,28 @@ cmd.addSlash("dm blacklist remove") do (channel: Option[GuildChannel]):
     data.blacklist.delete(loc)
     await astrea.api.sendInteractionMessage(i, "Channel removed from the blacklist!")
     await data.save()
+
+cmd.addSlash("dm timeout") do(channel: Option[GuildChannel], hours, minutes, seconds: Option[int]):
+  ## Change a timeout for a channel! Default is 5 mins
+  if canUseCommand(i, channel).await:
+    let
+      c = channel.get (await astrea.api.getChannel(i.channel_id.get()))[0].get()
+      hrs = hours.get(0)
+      mins = minutes.get(
+        if (seconds.isSome) or (hours.isSome):
+          0
+        else:
+          5
+      )
+      secs = seconds.get(0)
+
+    if c.isWhitelisted().await:
+      if (hrs == 0) and (mins == 5) and (secs == 0):
+        data.customCooldowns.del(c.id)
+      else:
+        data.customCooldowns[c.id] = initDuration(hours=hrs, minutes=mins, seconds=secs)
+      await astrea.api.sendInteractionMessage(i, "Changed the channel's timeout!")
+      await data.save()
+
+    else:
+      await astrea.api.sendInteractionMessage(i, "This channel isn't whitelisted, so it can't have a custom timeout applied!")
