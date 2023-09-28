@@ -18,7 +18,7 @@ import ./[
 
 
 let
-  defaultDuration = initDuration(hours=24)
+  defaultDuration = initDuration(minutes=5)
   lowMt = getMonoTime() - defaultDuration
 
 proc dmHandler*(s: Shard, m: Message) {.async.} =
