@@ -1,6 +1,7 @@
 import std/[
   asyncdispatch,
   monotimes,
+  random,
   tables,
   json
 ]
@@ -23,6 +24,8 @@ template loadJsonFile(s: string): JsonNode =
 let
   config* = loadJsonFile("config.json").to(Config)
   astrea* = newDiscordClient(config.token)
+
+var astreaId*: string
 
 var
   dataLocked = false

@@ -19,6 +19,7 @@ proc onReady(s: Shard, r: Ready) {.event(astrea).} =
   echo "Astrea Shadowstar, reporting for duty!"
 
   await cmd.registerCommands()
+  shared.astreaId = astrea.shards.values().toSeq().sample().user.id
 
   var status: string
 

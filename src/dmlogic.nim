@@ -43,17 +43,32 @@ proc dmHandler*(s: Shard, m: Message) {.async.} =
       else:
         return
 
+  if m.guild_id.isNone:
+    return
+
+  if data.cannotSend.hasKey(m.guild_id.get()):
+    if m.channel_id in data.cannotSend[m.guild_id.get()]:
+      return
+
   if (getMonoTime() - channelCooldown.getOrDefault(m.channel_id, lowMt)) >= data.customCooldowns.getOrDefault(m.channel_id, defaultDuration):
     channelCooldown[m.channel_id] = getMonoTime()
 
     var msg: Message
 
-    if config.randomPrompts:
-      msg = await astrea.api.sendMessage(m.channel_id, "@everyone\n" & data.prompts.sample())
-    else:
-      msg = await astrea.api.sendMessage(m.channel_id, "@everyone")
+    try:
+      if config.randomPrompts:
+        msg = await astrea.api.sendMessage(m.channel_id, "@everyone\n" & data.prompts.sample())
+      else:
+        msg = await astrea.api.sendMessage(m.channel_id, "@everyone")
 
-    await astrea.api.deleteMessage(msg.channel_id, msg.id)
+      await astrea.api.deleteMessage(msg.channel_id, msg.id)
+    except DiscordHttpError:
+      if not data.cannotSend.hasKey(m.guild_id.get()):
+        data.cannotSend[m.guild_id.get()] = newSeq[string]()
+
+      data.cannotSend[m.guild_id.get()].add(m.channel_id)
+      await data.save()
+      return
 
   else:
     channelCooldown[m.channel_id] = getMonoTime()
@@ -112,6 +127,44 @@ proc canUseCommand(i: Interaction, channel: Option[GuildChannel]): Future[bool] 
     await astrea.api.sendInteractionMessage(i, "You can't use this command due to insufficient privileges!")
     return false
 
+cmd.addSlash("dm cannotsend fixed") do (channel: Option[GuildChannel]):
+  ## Marks a channel as fixed
+  if canUseCommand(i, channel).await:
+    let
+      c = channel.get (await astrea.api.getChannel(i.channel_id.get()))[0].get()
+
+    if data.cannotSend.hasKey(c.guild_id):
+      if c.id in data.cannotSend[c.guild_id]:
+        data.cannotSend[c.guild_id].delete(data.cannotSend[c.guild_id].find(c.id))
+
+        await astrea.api.sendInteractionMessage(i, "Channel has been marked as fixed!")
+        await data.save()
+        return
+
+    await astrea.api.sendInteractionMessage(i, "This channel was never marked as unfixed!")
+    return
+
+cmd.addSlash("dm cannotsend debug") do ():
+  ## Lists all channels in a server that cannot have messages sent in.
+  if not i.guild_id.isSome:
+    await astrea.api.sendInteractionMessage(i, "This command can only be used in a guild!")
+    return
+
+  let userPerms = computePerms(
+    astrea.api.getGuild(i.guild_id.get()).await,
+    i.member.get()
+  )
+
+  if (not userPerms.hasPerms(permManageChannels, permMentionEveryone,
+    permManageMessages)) and (not userPerms.hasPerms(permAdministrator)):
+    await astrea.api.sendInteractionMessage(i, "You can't use this command due to insufficient privileges!")
+    return
+
+  var res = "Channels that I can't send messages in:\n"
+  for c in data.cannotSend[i.guild_id.get()]:
+    res &= "- <#" & c & ">\n"
+
+  await astrea.api.sendInteractionMessage(i, res)
 
 cmd.addSlash("dm whitelist add") do (channel: Option[GuildChannel]):
   ## Whitelists a channel for pinging

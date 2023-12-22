@@ -2,11 +2,8 @@ name: Build Astrea
 
 on:
   push:
-    tags-ignore:
-      - '**'
-    branches:
-      - '**'
-  workflow_dispatch:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   build:
@@ -17,8 +14,11 @@ jobs:
       - name: Install build essentials
         run: |
           microdnf install git xz tar findutils clang curl
-          curl https://nim-lang.org/choosenim/init.sh -sSf > init.sh
-          sh init.sh -y
+
+      - uses: jiro4989/setup-nim-action@v1
+        with:
+          nim-version: '2.0.2'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Clone source
         uses: actions/checkout@v3
@@ -27,11 +27,10 @@ jobs:
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
           cd $GITHUB_WORKSPACE
-          ~/.nimble/bin/nimble -y --nim:~/.nimble/bin/nim build -d:release -d:speed
-          mv ./astrea_client ~/astrea_client
+          nimble -y build -d:release -d:speed
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: ~/astrea_client
+          path: $GITHUB_WORKSPACE/astrea_client

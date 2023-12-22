@@ -3,12 +3,9 @@
     "\"*boobs*\" -Azalea",
     "\"I lik da rocc, 4 scienc yis\" -Chronos"
   ],
-  "whitelist": [
-    "1138652785823461437",
-    "1138652831323263128",
-    "1139585678057951262"
-  ],
+  "whitelist": [],
   "blacklist": [],
+  "cannotSend": {},
   "customCooldowns": {},
   "activities": [
     {
