@@ -19,6 +19,9 @@ jobs:
           nim-version: '2.0.2'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Clone source
+        uses: actions/checkout@v3
+
       - name: Build with Nimble
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
